@@ -6,7 +6,13 @@ import { NavigationContainer } from "@react-navigation/native";
 import HomeScreen from "../screens/HomeScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 
-const Drawer = createDrawerNavigator();
+// Definir las rutas del Drawer
+export type RootDrawerParamList = {
+  Home: undefined;
+  Profile: undefined;
+};
+
+const Drawer = createDrawerNavigator<RootDrawerParamList>();
 
 export default function DrawerNavigator() {
   return (
