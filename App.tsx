@@ -1,8 +1,13 @@
-import "./gesture-handler";
-
+// App.tsx
 import React from "react";
-import DrawerNavigator from "./navigation/DrawerNavigator";
+import MainNavigator from "./navigation/MainNavigator";
+import { StatusBar } from "expo-status-bar";
 
 export default function App() {
-  return <DrawerNavigator />;
+  return (
+    <>
+      <StatusBar translucent backgroundColor="transparent" style="light" />
+      <MainNavigator />
+    </>
+  );
 }

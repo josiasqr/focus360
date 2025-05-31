@@ -1,5 +1,10 @@
 {
   "expo": {
+    "androidStatusBar": {
+      "translucent": true,
+      "backgroundColor": "#00000000",
+      "barStyle": "light-content"
+    },
     "name": "focus360",
     "slug": "focus360",
     "version": "1.0.0",

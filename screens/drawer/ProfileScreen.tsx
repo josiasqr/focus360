@@ -1,7 +1,6 @@
-import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, Button } from "react-native";
-import ExpoHello from "../modules/expo-hello";
+import ExpoHello from "../../modules/expo-hello";
 
 export default function ProfileScreen() {
   const [installedApps, setInstalledApps] = useState([]);
@@ -24,7 +23,6 @@ export default function ProfileScreen() {
 
   return (
     <View style={{ flex: 1, paddingTop: 50, paddingHorizontal: 20 }}>
-      <StatusBar style="auto" />
       <Text style={{ fontSize: 22, fontWeight: "bold", marginBottom: 10 }}>
         Profile Screen
       </Text>
