@@ -17,8 +17,16 @@ export default function DrawerNavigator() {
     <>
       <StatusBar style="light" backgroundColor="#F54749" translucent={false} />
       <Drawer.Navigator initialRouteName="Home">
-        <Drawer.Screen name="Home" component={HomeScreen} />
-        <Drawer.Screen name="Profile" component={ProfileScreen} />
+        <Drawer.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{ title: "Hoy" }}
+        />
+        <Drawer.Screen
+          name="Profile"
+          component={ProfileScreen}
+          options={{ title: "Configuración" }}
+        />
       </Drawer.Navigator>
     </>
   );
