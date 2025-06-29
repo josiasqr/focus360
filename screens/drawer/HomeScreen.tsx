@@ -5,8 +5,8 @@ import Svg, { Circle, Path } from "react-native-svg";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { RootDrawerParamList } from "../../navigation/DrawerNavigator";
 
-import instagram from "../../assets/icons/instagram-240.png";
-import tiktok from "../../assets/icons/tiktok-250.png";
+import instagram from "../../assets/icons/instagram.png";
+import tiktok from "../../assets/icons/tiktoklite.png";
 import walk from "../../assets/icons/walk-100.png";
 
 type HomeScreenNavigationProp = DrawerNavigationProp<

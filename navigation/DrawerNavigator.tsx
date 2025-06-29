@@ -3,11 +3,13 @@ import { createDrawerNavigator } from "@react-navigation/drawer";
 import { StatusBar } from "expo-status-bar";
 
 import HomeScreen from "../screens/drawer/HomeScreen";
-import ProfileScreen from "../screens/drawer/ProfileScreen";
+import ProfileStack from "./ProfileStack"; // ⟵ usa el stack
+import SettingsScreen from "../screens/drawer/SettingsScreen";
 
 export type RootDrawerParamList = {
   Home: undefined;
   Profile: undefined;
+  Settings: undefined;
 };
 
 const Drawer = createDrawerNavigator<RootDrawerParamList>();
@@ -24,7 +26,12 @@ export default function DrawerNavigator() {
         />
         <Drawer.Screen
           name="Profile"
-          component={ProfileScreen}
+          component={ProfileStack}
+          options={{ title: "Aplicaciones" }}
+        />
+        <Drawer.Screen
+          name="Settings"
+          component={SettingsScreen}
           options={{ title: "Configuración" }}
         />
       </Drawer.Navigator>
