@@ -7,7 +7,6 @@ import {
   Switch,
   TextInput,
   Platform,
-  Alert,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
@@ -57,6 +56,25 @@ export default function AppConfigScreen() {
   const [pauseBg, setPauseBg] = useState(false);
   const [dailyLimit, setDailyLimit] = useState("");
 
+  // ✅ Convertir "HH:MM:SS" a minutos
+  const parseTimeToMinutes = (time: string): number => {
+    const [hh = "0", mm = "0", ss = "0"] = time.split(":");
+    const hours = parseInt(hh, 10);
+    const minutes = parseInt(mm, 10);
+    const seconds = parseInt(ss, 10);
+    return hours * 60 + minutes + Math.floor(seconds / 60);
+  };
+
+  const totalWeeklyMinutes = parseTimeToMinutes(
+    app?.formattedTotalUsage ?? "00:00:00"
+  );
+
+  const formatMinutes = (min: number) => {
+    const hours = Math.floor(min / 60);
+    const minutes = min % 60;
+    return `${hours}h ${minutes}m`;
+  };
+
   useFocusEffect(
     useCallback(() => {
       let isActive = true;
@@ -92,7 +110,6 @@ export default function AppConfigScreen() {
   };
 
   const handleLimitChange = (text: string) => {
-    // Solo números
     const sanitized = text.replace(/[^0-9]/g, "");
     setDailyLimit(sanitized);
   };
@@ -103,7 +120,7 @@ export default function AppConfigScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header custom */}
+      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={styles.backText}>
@@ -113,9 +130,17 @@ export default function AppConfigScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Configuration options */}
+      {/* 🔔 Alerta de uso semanal */}
+      <View style={styles.alertBox}>
+        <Text style={styles.alertTitle}>🕒 Tiempo total de uso (7 días)</Text>
+        <Text style={styles.alertText}>
+          Has usado esta app {formatMinutes(totalWeeklyMinutes)} en la última
+          semana.
+        </Text>
+      </View>
+
+      {/* Opciones de configuración */}
       <View style={styles.body}>
-        {/* 1. Bloqueo Automático */}
         <OptionRow
           label={"Bloqueo automático"}
           description="Al activarlo, la aplicación se bloqueará automáticamente tras inactividad."
@@ -123,7 +148,6 @@ export default function AppConfigScreen() {
           onValueChange={(v) => handleToggle(setAutoLock, "autoLock", v)}
         />
 
-        {/* 2. Modo enfoque */}
         <OptionRow
           label="Modo enfoque"
           description="Oculta notificaciones de esta app para mejorar concentración."
@@ -131,7 +155,6 @@ export default function AppConfigScreen() {
           onValueChange={(v) => handleToggle(setSilentNotif, "silentNotif", v)}
         />
 
-        {/* 3. Alertas inteligentes */}
         <OptionRow
           label="Alertas inteligentes"
           description="Muestra avisos cuando el uso es excesivo según el modelo ML."
@@ -141,7 +164,6 @@ export default function AppConfigScreen() {
           }
         />
 
-        {/* 4. Tiempo de descanso forzado */}
         <OptionRow
           label="Tiempo de descanso forzado"
           description="Tiempo de espera obligatorio tras usar demasiado."
@@ -149,7 +171,7 @@ export default function AppConfigScreen() {
           onValueChange={(v) => handleToggle(setPauseBg, "pauseBg", v)}
         />
 
-        {/* 5. Límite de uso por día */}
+        {/* Límite diario */}
         <View style={[styles.row, styles.limitRow]}>
           <View style={styles.textContainer}>
             <Text style={styles.optionLabel}>Límite de uso por día (min)</Text>
@@ -157,7 +179,6 @@ export default function AppConfigScreen() {
               Establece un tiempo máximo de uso diario.
             </Text>
           </View>
-
           <TextInput
             style={styles.limitInput}
             keyboardType="numeric"
@@ -212,6 +233,30 @@ const styles = StyleSheet.create({
   backText: {
     fontSize: 18,
     fontWeight: "500",
+  },
+  alertBox: {
+    backgroundColor: "#FFF8E1",
+    borderColor: "#FFD54F",
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    margin: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  alertTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#F57F17",
+    marginBottom: 4,
+  },
+  alertText: {
+    fontSize: 14,
+    color: "#444",
   },
   body: {
     paddingHorizontal: 20,

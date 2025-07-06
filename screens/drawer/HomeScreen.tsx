@@ -1,24 +1,34 @@
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { Image } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { RootDrawerParamList } from "../../navigation/DrawerNavigator";
 
-import instagram from "../../assets/icons/instagram.png";
-import tiktok from "../../assets/icons/tiktoklite.png";
+import { appIcons } from "../../data/AppIcons";
 import walk from "../../assets/icons/walk-100.png";
+import ExpoHello from "../../modules/expo-hello";
 
+// Tipo de navegación
 type HomeScreenNavigationProp = DrawerNavigationProp<
   RootDrawerParamList,
   "Home"
 >;
 
+// Props
 type Props = {
   navigation: HomeScreenNavigationProp;
 };
 
-// Componente UsageCircle para mostrar el uso en horas como barra circular
+// Función para convertir "HH:MM:SS" a minutos
+const parseTimeToMinutes = (time: string): number => {
+  const [hh = "0", mm = "0", ss = "0"] = time.split(":");
+  const hours = parseInt(hh, 10);
+  const minutes = parseInt(mm, 10);
+  const seconds = parseInt(ss, 10);
+  return hours * 60 + minutes + Math.floor(seconds / 60);
+};
+
+// Mostrar el círculo de uso diario
 const UsageCircle = ({
   hoursUsed,
   size = 280,
@@ -38,7 +48,6 @@ const UsageCircle = ({
     <View style={{ alignItems: "center", marginBottom: 10 }}>
       <View style={{ position: "relative", width: size, height: size }}>
         <Svg width={size} height={size}>
-          {/* Círculo de fondo gris claro */}
           <Circle
             stroke="#DFDCDC"
             fill="none"
@@ -47,7 +56,6 @@ const UsageCircle = ({
             r={radius}
             strokeWidth={strokeWidth}
           />
-          {/* Círculo de progreso naranja */}
           <Circle
             stroke="#F54749"
             fill="none"
@@ -62,7 +70,6 @@ const UsageCircle = ({
             origin={`${size / 2}, ${size / 2}`}
           />
         </Svg>
-
         <View
           style={{
             position: "absolute",
@@ -86,16 +93,39 @@ const UsageCircle = ({
   );
 };
 
+// Pantalla principal
 const HomeScreen: React.FC<Props> = ({ navigation }) => {
-  // Ejemplo de horas usadas
-  const hoursUsed = 20;
+  const [installedApps, setInstalledApps] = useState<any[]>([]);
 
-  React.useEffect(() => {
+  useEffect(() => {
+    ExpoHello.getInstalledApps()
+      .then((apps) => setInstalledApps(apps))
+      .catch((err) => console.error("Error al obtener apps:", err));
+  }, []);
+
+  const hoursUsed =
+    installedApps.reduce(
+      (acc, app) =>
+        acc + parseTimeToMinutes(app.formattedTotalUsage ?? "00:00:00"),
+      0
+    ) / 60;
+
+  // Obtener las 2 apps más usadas
+  const topApps = [...installedApps]
+    .filter((app) => app.appName.toLowerCase() !== "focus360")
+    .map((app) => ({
+      ...app,
+      minutes: parseTimeToMinutes(app.formattedTotalUsage),
+    }))
+    .sort((a, b) => b.minutes - a.minutes)
+    .slice(0, 2);
+
+  useEffect(() => {
     navigation.setOptions({
       headerTitle: "Actividad diaria",
       headerTitleAlign: "center",
       headerTitleStyle: {
-        color: "#F54749", // Cambia el color del título
+        color: "#F54749",
         fontSize: 25,
         fontWeight: "bold",
       },
@@ -106,7 +136,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     <View style={styles.container}>
       <UsageCircle hoursUsed={hoursUsed} />
 
-      {/* Ubicación y texto */}
+      {/* Info de pasos */}
       <View style={styles.locationContainer}>
         <Path
           d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"
@@ -114,10 +144,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           scale={1.4}
         />
         <View style={styles.rowContainer}>
-          {/* Ícono alineado a la izquierda */}
           <Image source={walk} style={{ width: 64, height: 64 }} />
-
-          {/* Bloque de textos alineados verticalmente */}
           <View>
             <Text>
               <Text style={styles.kmNumber}>1.2 km</Text>
@@ -127,31 +154,31 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         </View>
       </View>
 
-      {/* Iconos de apps más usadas */}
+      {/* Apps más usadas dinámicas */}
       <View style={styles.iconsRow}>
-        {/* TikTok */}
-        <View style={styles.appIconContainer}>
-          <Image source={tiktok} style={{ width: 100, height: 100 }} />
-          <Text style={styles.iconText}>
-            <Text style={styles.highlighted}>TikTok</Text> es la app más usada
-            con 27 horas y 30 minutos
-          </Text>
-        </View>
-        {/* Separador */}
-
-        <View style={styles.separator} />
-
-        {/* Instagram */}
-        <View style={styles.appIconContainer}>
-          <Image source={instagram} style={{ width: 100, height: 100 }} />
-          <Text style={styles.iconText}>
-            <Text style={styles.highlighted}>Instagram</Text> es la app más
-            usada con 21 horas y 30 minutos
-          </Text>
-        </View>
+        {topApps.map((app, index) => {
+          const iconKey = app.appName.toLowerCase().replace(/\s+/g, "");
+          const iconSource = appIcons[iconKey];
+          const hours = Math.floor(app.minutes / 60);
+          const minutes = app.minutes % 60;
+          return (
+            <React.Fragment key={index}>
+              <View style={styles.appIconContainer}>
+                <Image
+                  source={iconSource}
+                  style={{ width: 100, height: 100 }}
+                />
+                <Text style={styles.iconText}>
+                  <Text style={styles.highlighted}>{app.appName}</Text> es la
+                  app más usada con {hours}h {minutes}m
+                </Text>
+              </View>
+              {index === 0 && <View style={styles.separator} />}
+            </React.Fragment>
+          );
+        })}
       </View>
 
-      {/* Últimos 7 días */}
       <Text style={styles.footer}>Últimos 7 días</Text>
       <TouchableOpacity style={styles.button}>
         <Text style={styles.buttonText}>Ver todas las apps</Text>
